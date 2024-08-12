@@ -7,13 +7,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Postman CLI
         run: |
           curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+
       - name: Login to Postman CLI
         run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+
       - name: Run API tests
         run: |
-          postman collection run "${{ github.workspace }}/postman/collections/Dashbold API V.1.0.0.json" -e "4532654-5fb38c9c-a3f8-49ed-8549-7f0840b61018"
-          # Lint your API using Postman CLI
-          postman api lint 9553b8c0-229b-4c55-89bb-c7b750389547
+          postman collection run "${{ github.workspace }}/postman/collections/Dashbold API V.1.0.0.json" \
+            -e "4532654-5fb38c9c-a3f8-49ed-8549-7f0840b61018" \
+            --reporters cli,junit \
+            --reporter-junit-export "postman-reports/Automated_API_Tests_Report.xml"
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: Automated API Tests Report
+          path: postman-reports/Automated_API_Tests_Report.xml
+
+      - name: Lint your API using Postman CLI
+        run: postman api lint 9553b8c0-229b-4c55-89bb-c7b750389547
