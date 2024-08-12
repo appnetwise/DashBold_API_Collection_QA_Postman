@@ -1,4 +1,4 @@
-name: Automated API tests using Postman CLI
+name: Automated API tests using Newman
 
 on: push
 
@@ -8,16 +8,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install Postman CLI
-        run: |
-          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
       
-      - name: Login to Postman CLI
-        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+      - name: Install Newman
+        run: npm install -g newman
       
-      - name: Run API tests and generate reports
+      - name: Run API tests with Newman
         run: |
-          postman collection run "${{ github.workspace }}/postman/collections/Dashbold API V.1.0.0.json" \
+          newman run "/home/runner/work/anw_dashbold_backend_qa/anw_dashbold_backend_qa/postman/collections/Dashbold API V.1.0.0.json" \
             -e "4532654-5fb38c9c-a3f8-49ed-8549-7f0840b61018" \
             --reporters cli,junit,html \
             --reporter-junit-export "postman-reports/Automated_API_Tests_Report.xml" \
@@ -28,6 +29,3 @@ jobs:
         with:
           name: Automated API Tests Reports
           path: postman-reports/
-          
-      - name: Lint your API using Postman CLI
-        run: postman api lint 9553b8c0-229b-4c55-89bb-c7b750389547
